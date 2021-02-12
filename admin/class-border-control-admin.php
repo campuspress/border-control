@@ -1384,7 +1384,16 @@ class Border_Control_Admin {
 						$last_public
 					)
 				);
-				$post_meta_infos = $wpdb->get_results("SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=$post_id");
+
+				$post_meta_infos = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT meta_key, meta_value 
+						FROM $wpdb->postmeta 
+						WHERE post_id = %d
+						", 
+						$post_id
+					)
+				);
 				if ( 0 !== count( $post_meta_infos ) ) {
 					$sql_query = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
 					foreach ( $post_meta_infos as $meta_info ) {
@@ -1398,6 +1407,9 @@ class Border_Control_Admin {
 					$sql_query .= implode( ' UNION ALL ', $sql_query_sel );
 					$wpdb->query( $sql_query );
 				}
+
+				// Delete post cache.
+				wp_cache_delete( $last_public, 'post_meta' );
 			}
 		endif;
 
